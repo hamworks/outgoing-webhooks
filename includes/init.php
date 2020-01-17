@@ -27,6 +27,9 @@ add_action(
 );
 
 add_action( 'edit_form_after_editor', function ( \WP_Post $post ) {
+	if ( $post->post_type !== 'outgoing_webhooks' ) {
+		return;
+	}
 	?>
 	<table class="form-table" role="presentation">
 		<tbody>
@@ -41,9 +44,19 @@ add_action( 'edit_form_after_editor', function ( \WP_Post $post ) {
 	<?php
 } );
 
+function get_webhooks() {
+	return get_posts(
+		[
+			'post_type' => 'outgoing_webhooks',
+			'nopaging' => 1,
+			'posts_per_page' => -1
+		]
+	);
+}
+
 add_action( 'save_post', function ( $post_id, \WP_Post $post ) {
 
-	if ( $post->post_type === 'outgoing_webhooks') {
+	if ( $post->post_type === 'outgoing_webhooks' ) {
 		return;
 	}
 
@@ -57,5 +70,7 @@ add_action( 'save_post', function ( $post_id, \WP_Post $post ) {
 		),
 		'body'    => json_encode( $body ),
 	);
-	$result = wp_remote_post( $post->post_content, $request );
+	foreach ( get_webhooks() as $webhook ) {
+		$result = wp_remote_post( $webhook->post_content, $request );
+	}
 }, 10, 2 );
