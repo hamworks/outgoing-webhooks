@@ -44,22 +44,20 @@ add_action( 'edit_form_after_editor', function ( \WP_Post $post ) {
 	<?php
 } );
 
+/**
+ * @return int[]|\WP_Post[]
+ */
 function get_webhooks() {
 	return get_posts(
 		[
-			'post_type' => 'outgoing_webhooks',
-			'nopaging' => 1,
-			'posts_per_page' => -1
+			'post_type'      => 'outgoing_webhooks',
+			'nopaging'       => 1,
+			'posts_per_page' => - 1
 		]
 	);
 }
 
-add_action( 'save_post', function ( $post_id, \WP_Post $post ) {
-
-	if ( $post->post_type === 'outgoing_webhooks' ) {
-		return;
-	}
-
+function invoke_webhooks() {
 	$container_url = esc_url( get_option( 'home' ) );
 	$body          = array(
 		"CONTAINER_URL" => $container_url,
@@ -72,5 +70,27 @@ add_action( 'save_post', function ( $post_id, \WP_Post $post ) {
 	);
 	foreach ( get_webhooks() as $webhook ) {
 		$result = wp_remote_post( $webhook->post_content, $request );
+		wp_insert_comment( [
+
+			'comment_post_ID'  => $webhook->ID,
+			'comment_content'  => json_encode( $result ),
+			'comment_author_url' => $webhook->post_content,
+			'user_id'          => get_current_user_id(),
+		] );
 	}
+}
+
+add_action( 'save_post', function ( $post_id, \WP_Post $post ) {
+
+	if ( $post->post_type === 'outgoing_webhooks' ) {
+		return;
+	}
+
+	if ( $post->post_status !== 'publish' ) {
+		return;
+	}
+
+	invoke_webhooks();
+
+
 }, 10, 2 );
