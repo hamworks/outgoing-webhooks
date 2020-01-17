@@ -7,7 +7,7 @@
  * Author URI:      https://ham.works
  * Text Domain:     outgoing-webhooks
  * Domain Path:     /languages
- * Version: 0.0.2
+ * Version: 0.0.3
  *
  * @package         HAMWORKS\Outgoing_Webhooks
  */
