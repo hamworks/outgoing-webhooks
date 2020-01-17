@@ -1,0 +1,39 @@
+{
+	"name": "@hamworks/outgoing-webhooks",
+	"version": "0.0.1",
+	"author": "Hiroshi Urabe <urabe@ham.works> (https://ham.works)",
+	"license": "GPL-3.0+",
+	"main": "build/index.js",
+	"scripts": {
+		"env": "wp-scripts env",
+		"lint-js": "wp-scripts lint-js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:team-hamworks/outgoing-webhooks.git"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@wordpress/browserslist-config": "2.6.0",
+		"@wordpress/scripts": "^6.1.1"
+	},
+	"wp-env": {
+		"plugin-dir": "outgoing-webhooks",
+		"plugin-name": "outgoing-webhooks",
+		"welcome-build-command": "npm run start"
+	},
+	"release-it": {
+		"hooks": {
+			"before:bump": "bash ./bin/create-release.sh ${version}"
+		},
+		"github": {
+			"release": true,
+			"assets": [
+				"outgoing-webhooks.zip"
+			]
+		},
+		"npm": {
+			"publish": false
+		}
+	}
+}
